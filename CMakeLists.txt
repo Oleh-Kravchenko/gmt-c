@@ -1,0 +1,38 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
+PROJECT(gmt-c)
+
+INCLUDE(GenerateExportHeader)
+INCLUDE(GNUInstallDirs)
+
+FIND_PACKAGE(cmake-version4git REQUIRED)
+
+PROJECT_VERSION_FROM_GIT()
+ADD_DEFINITIONS(${PROJECT_VERSION4GIT_CFLAGS})
+
+ADD_LIBRARY(gmt
+SHARED
+	include/gmt/gmt.h
+	include/platform.h
+	include/sha1.h
+	source/gmt.c
+	source/sha1.c
+	$<IF:$<PLATFORM_ID:Windows>,source/win32.c,source/unix.c>)
+
+GENERATE_EXPORT_HEADER(gmt EXPORT_FILE_NAME gmt/gmt_export.h)
+
+TARGET_INCLUDE_DIRECTORIES(gmt
+PUBLIC
+	$<BUILD_INTERFACE:
+		${CMAKE_CURRENT_BINARY_DIR}
+		include
+	>)
+
+ADD_EXECUTABLE(gmt_test
+source/gmt_test.c)
+
+TARGET_LINK_LIBRARIES(gmt_test
+PRIVATE
+	gmt)
+
+INSTALL(TARGETS gmt DESTINATION ${CMAKE_INSTALL_LIBDIR})
+INSTALL(TARGETS gmt_test DESTINATION ${CMAKE_INSTALL_BINDIR})
