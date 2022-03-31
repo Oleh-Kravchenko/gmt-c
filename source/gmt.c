@@ -2,20 +2,23 @@
 // Copyright (C) 2022 Oleh Kravchenko <oleg@kaa.org.ua>
 
 #include <limits.h>
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#include "platform.h"
 #include "gmt/gmt.h"
 #include "list.h"
+#include "platform.h"
 #include "sha1.h"
 
 struct gmt {
+	int		ready;
 	char		*hint;
 	SHA1Context	in;
 	struct list	out;
 };
+
+static struct gmt _gmt;
 
 struct gmt_data {
 	struct list	list;
@@ -37,40 +40,34 @@ static void put_file_contents(const char *path, const void *buf, size_t len)
 	fclose(f);
 }
 
-static struct gmt *__gmtBegin(void)
+GMT_EXPORT void gmtBegin(const char *name)
 {
-	struct gmt *gmt;
+	if (_gmt.ready)
+		abort();
+	_gmt.ready = !_gmt.ready;
 
-	gmt = malloc(sizeof(struct gmt));
-	if (!gmt)
+	SHA1Reset(&_gmt.in);
+	list_init(&_gmt.out);
+
+	_gmt.hint = strdup(name);
+	if (!_gmt.hint)
+		abort();
+}
+
+GMT_EXPORT void gmtInv(const void *ptr, size_t len)
+{
+	if (!_gmt.ready)
 		abort();
 
-	SHA1Reset(&gmt->in);
-	list_init(&gmt->out);
-
-	return gmt;
+	SHA1Input(&_gmt.in, ptr, len);
 }
 
-GMT_EXPORT struct gmt *gmtBegin(const char *name)
-{
-	struct gmt *gmt;
-
-	gmt = __gmtBegin();
-	gmt->hint = strdup(name);
-	if (!gmt->hint)
-		abort();
-
-	return gmt;
-}
-
-GMT_EXPORT void gmtIn(struct gmt *gmt, const void *ptr, size_t len)
-{
-	SHA1Input(&gmt->in, ptr, len);
-}
-
-GMT_EXPORT void gmtOut(struct gmt *gmt, const void *ptr, size_t len)
+GMT_EXPORT void gmtOutv(const void *ptr, size_t len)
 {
 	struct gmt_data *item;
+
+	if (!_gmt.ready)
+		abort();
 
 	item = malloc(sizeof(*item));
 	if (!item)
@@ -83,10 +80,10 @@ GMT_EXPORT void gmtOut(struct gmt *gmt, const void *ptr, size_t len)
 	memcpy(item->ptr, ptr, len);
 	item->len = len;
 
-	list_add_tail(&gmt->out, &item->list);
+	list_add_tail(&_gmt.out, &item->list);
 }
 
-GMT_EXPORT void gmtEnd(struct gmt *gmt)
+GMT_EXPORT void gmtEnd(void)
 {
 	uint8_t		sha1[SHA1HashSize];
 	char 		sha1name[SHA1HashSize * 2 + 1];
@@ -97,10 +94,10 @@ GMT_EXPORT void gmtEnd(struct gmt *gmt)
 	struct gmt_data	*i, *t;
 	char		filename[PATH_MAX];
 
-	if (!gmt)
-		return;
+	if (!_gmt.ready)
+		abort();
 
-	SHA1Result(&gmt->in, sha1);
+	SHA1Result(&_gmt.in, sha1);
 	snprintf(sha1name, sizeof(sha1name),
 		"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x"
 		"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
@@ -121,7 +118,7 @@ GMT_EXPORT void gmtEnd(struct gmt *gmt)
 	}
 
 	path_len += snprintf(path + path_len, sizeof(path) - path_len,
-			    "%s/", gmt->hint);
+			     "%s/", _gmt.hint);
 	create_directory(path);
 
 	path_len += snprintf(path + path_len, sizeof(path) - path_len,
@@ -129,7 +126,7 @@ GMT_EXPORT void gmtEnd(struct gmt *gmt)
 	create_directory(path);
 
 	filenum = 0;
-	list_foreach_safe(&gmt->out, i, t, struct gmt_data, list) {
+	list_foreach_safe(&_gmt.out, i, t, struct gmt_data, list) {
 		path_len += snprintf(filename, sizeof(filename),
 				    "%s%lu", path, filenum++);
 		put_file_contents(filename, i->ptr, i->len);
@@ -139,6 +136,7 @@ GMT_EXPORT void gmtEnd(struct gmt *gmt)
 		free(i);
 	}
 
-	free(gmt->hint);
-	free(gmt);
+	free(_gmt.hint);
+
+	memset(&_gmt, 0, sizeof(_gmt));
 }

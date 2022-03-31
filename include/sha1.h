@@ -17,7 +17,19 @@
 #ifndef _SHA1_H_
 #define _SHA1_H_
 
+#ifdef WIN32
+
+#include <windows.h>
+
+typedef DWORD uint32_t;
+typedef BYTE uint8_t;
+typedef short int_least16_t;
+
+#else /* WIN32 */
+
 #include <stdint.h>
+
+#endif /* WIN32 */
 /*
  * If you do not have the ISO standard stdint.h header file, then you
  * must typdef the following:

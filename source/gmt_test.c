@@ -7,27 +7,36 @@
 
 int main(int argc, char *argv[])
 {
-	const char *input = "Input string";
-	const char *output = "Output string";
-
 	printf("gmt-%s (%s: %s)\n",
 	       PROJECT_VERSION,
 	       PROJECT_GIT_BRANCH,
 	       PROJECT_GIT_SHORT);
 
-	struct gmt *gmt = gmtBegin(__func__);
+	gmtBegin("test");
 
-	gmtInString(gmt, input);
-	gmtInUint32(gmt, 1);
-	gmtInUint32(gmt, 2);
-	gmtInUint32(gmt, 3);
+	gmtInc(-10);
+	gmtIns(-10000);
+	gmtIni(-1000000);
+	gmtInf(3.14159);
+	gmtInd(2.71828);
+	gmtInub(255);
+	gmtInus(65535);
+	gmtInui(1000000);
+	gmtInstr("Input string");
 
-	gmtOutString(gmt, output);
-	gmtOutUint32(gmt, 4);
-	gmtOutUint32(gmt, 5);
-	gmtOutUint32(gmt, 6);
+	// black box
 
-	gmtEnd(gmt);
+	gmtOutc(-10);
+	gmtOuts(-10000);
+	gmtOuti(-1000000);
+	gmtOutf(3.14159);
+	gmtOutd(2.71828);
+	gmtOutub(255);
+	gmtOutus(65535);
+	gmtOutui(1000000);
+	gmtOutstr("Output string");
+
+	gmtEnd();
 
 	return 0;
 }

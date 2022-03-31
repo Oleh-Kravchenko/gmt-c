@@ -5,37 +5,124 @@
 #define __GMT_H
 
 #include <stddef.h>
-#include <stdint.h>
 #include <string.h>
+
+#ifdef WIN32
+
+#include <windows.h>
+#define inline __inline
+
+#endif /* WIN32 */
 
 #include <gmt/gmt_export.h>
 
-GMT_EXPORT struct gmt *gmtBegin(const char *name);
+// v	array
+// c	char
+// s	short
+// i	int
+// f	float
+// d	double
+// ub	unsigned char
+// us	unsigned short
+// ui	unsigned int
+// str	NULL terminated string
 
-GMT_EXPORT void gmtIn(struct gmt *gmt, const void *ptr, size_t len);
+GMT_EXPORT void gmtBegin(const char *name);
 
-GMT_EXPORT void gmtOut(struct gmt *gmt, const void *ptr, size_t len);
+GMT_EXPORT void gmtInv(const void *ptr, size_t len);
 
-GMT_EXPORT void gmtEnd(struct gmt *gmt);
-
-static inline void gmtInString(struct gmt *gmt, const char *s)
+static inline void gmtInc(char c)
 {
-	gmtIn(gmt, s, strlen(s));
+	gmtInv(&c, sizeof(c));
 }
 
-static inline void gmtOutString(struct gmt *gmt, const char *s)
+static inline void gmtIns(short s)
 {
-	gmtOut(gmt, s, strlen(s));
+	gmtInv(&s, sizeof(s));
 }
 
-static inline void gmtInUint32(struct gmt *gmt, uint32_t i)
+static inline void gmtIni(int i)
 {
-	gmtIn(gmt, &i, sizeof(i));
+	gmtInv(&i, sizeof(i));
 }
 
-static inline void gmtOutUint32(struct gmt *gmt, uint32_t i)
+static inline void gmtInf(float f)
 {
-	gmtOut(gmt, &i, sizeof(i));
+	gmtInv(&f, sizeof(f));
 }
+
+static inline void gmtInd(double d)
+{
+	gmtInv(&d, sizeof(d));
+}
+
+static inline void gmtInub(unsigned char uc)
+{
+	gmtInv(&uc, sizeof(uc));
+}
+
+static inline void gmtInus(unsigned short us)
+{
+	gmtInv(&us, sizeof(us));
+}
+
+static inline void gmtInui(unsigned int ui)
+{
+	gmtInv(&ui, sizeof(ui));
+}
+
+static inline void gmtInstr(const char *str)
+{
+	gmtInv(str, strlen(str));
+}
+
+GMT_EXPORT void gmtOutv(const void *ptr, size_t len);
+
+static inline void gmtOutc(char c)
+{
+	gmtOutv(&c, sizeof(c));
+}
+
+static inline void gmtOuts(short s)
+{
+	gmtOutv(&s, sizeof(s));
+}
+
+static inline void gmtOuti(int i)
+{
+	gmtOutv(&i, sizeof(i));
+}
+
+static inline void gmtOutf(float f)
+{
+	gmtOutv(&f, sizeof(f));
+}
+
+static inline void gmtOutd(double d)
+{
+	gmtOutv(&d, sizeof(d));
+}
+
+static inline void gmtOutub(unsigned char uc)
+{
+	gmtOutv(&uc, sizeof(uc));
+}
+
+static inline void gmtOutus(unsigned short us)
+{
+	gmtOutv(&us, sizeof(us));
+}
+
+static inline void gmtOutui(unsigned int ui)
+{
+	gmtOutv(&ui, sizeof(ui));
+}
+
+static inline void gmtOutstr(const char *str)
+{
+	gmtOutv(str, strlen(str));
+}
+
+GMT_EXPORT void gmtEnd(void);
 
 #endif /* __GMT_H */
