@@ -1,8 +1,23 @@
 # Golden Master Testing for C
 
-I developed this toolkit while refactoring one old project that I've worked on just for fun.
+I'm developing this toolkit while refactoring one old project I'm working on for fun.
+I hope you will find this project useful too.
 
-## Session #1:
+# Usage
+
+gmt-c is CMake based project, so if you also you CMake,
+you can easily connect it to your project:
+
+## CMake
+
+	FIND_PACKAGE(cmake-version4git REQUIRED)
+
+	TARGET_LINK_LIBRARIES(application PRIVATE gmt-c)
+
+
+## Code
+
+### Session #1:
 
 	gmtBegin()
 	gmtInput(a, sizeof(a));
@@ -20,7 +35,7 @@ I developed this toolkit while refactoring one old project that I've worked on j
 	gmtOutput(&x, sizeof(x));
 	gmtEnd();
 
-## Session #2 after refactoring
+### Session #2 after refactoring
 
 	gmtBegin()
 	gmtInput(a, sizeof(a));
@@ -33,3 +48,7 @@ I developed this toolkit while refactoring one old project that I've worked on j
 ## Verification
 
 	compare
+
+# TODO
+
+- Implement **compare** tool.
