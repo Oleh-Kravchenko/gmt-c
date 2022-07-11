@@ -5,7 +5,10 @@ INCLUDE(CMakePackageConfigHelpers)
 INCLUDE(GenerateExportHeader)
 INCLUDE(GNUInstallDirs)
 
-FIND_PACKAGE(cmake-version4git REQUIRED)
+FIND_PACKAGE(cmake-version4git 0.0 QUIET)
+IF(NOT cmake-version4git_FOUND)
+	INCLUDE(3rdparty/cmake-version4git/cmake/cmake-version4git.cmake)
+ENDIF()
 
 PROJECT_VERSION_FROM_GIT()
 ADD_DEFINITIONS(${PROJECT_VERSION4GIT_CFLAGS})
