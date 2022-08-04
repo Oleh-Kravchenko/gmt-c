@@ -7,9 +7,8 @@
 
 int main(int argc, char *argv[])
 {
-	printf("gmt-%s (%s: %s)\n",
+	printf("gmt-%s (%s)\n",
 	       PROJECT_VERSION,
-	       PROJECT_GIT_BRANCH,
 	       PROJECT_GIT_SHORT);
 
 	gmtBegin("test");
